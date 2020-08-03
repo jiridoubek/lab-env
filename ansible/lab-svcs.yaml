@@ -1,0 +1,159 @@
+- name: Create LAB
+  hosts: localhost
+  connection: local
+  
+  vars:
+    name: "lab"
+    backend: "172.16.245.100"
+    frontend: "10.10.245.100"
+    frontend_http_port: "80"
+    frontend_https_port: "443"
+    frontend_prometheus_port: "9090"
+    frontend_grafana_port: "3000"
+  
+  environment:
+    F5_SERVER: "172.16.245.254"
+    F5_USER: admin
+    F5_PASSWORD: heslohesel123
+    F5_VALIDATE_CERTS: "no"
+          
+  tasks:   
+   - name: Create server node
+     bigip_node:
+       host: '{{ backend }}'
+       name: '{{ name }}_backend'
+
+   - name: create http monitor
+     bigip_monitor_http:
+       name: '{{ name }}_http'
+
+   - name: create nginx pool
+     bigip_pool:
+       name: '{{ name }}_nginx'
+       lb_method: round-robin
+       monitor_type: single
+       monitors:
+         - '{{ name }}_http'
+
+   - name: add nginx pool members
+     bigip_pool_member:
+       pool: '{{ name }}_nginx'
+       host: '{{ backend }}'
+       name: '{{ name }}_backend'
+       port: '{{ item.port }}'
+     loop:
+       - name: nginx1
+         port: "8081"
+       - name: nginx2
+         port: "8082"
+       - name: nginx3
+         port: "8083"
+       - name: nginx4
+         port: "8084"
+
+   - name: create nginx http vs
+     bigip_virtual_server:
+       name: '{{ name }}_nginx'
+       destination: '{{ frontend }}'
+       port: '{{ frontend_http_port }}'
+       pool: '{{ name }}_nginx'
+       snat: Automap
+       profiles:
+         - http
+
+   - name: create https monitor
+     bigip_monitor_https:
+       name: '{{ name }}_https'
+
+   - name: create nginx  ssl pool
+     bigip_pool:
+       name: '{{ name }}_nginx_ssl'
+       lb_method: round-robin
+       monitor_type: single
+       monitors:
+         - '{{ name }}_https'
+
+   - name: add nginx ssl pool members
+     bigip_pool_member:
+       pool: '{{ name }}_nginx_ssl'
+       host: '{{ backend }}'
+       name: '{{ name }}_backend'
+       port: '{{ item.port }}'
+     loop:
+       - name: nginx1
+         port: "4431"
+       - name: nginx2
+         port: "4432"
+       - name: nginx3
+         port: "4433"
+       - name: nginx4
+         port: "4434"
+
+   - name: create nginx https vs
+     bigip_virtual_server:
+       name: '{{ name }}_nginx_https'
+       destination: '{{ frontend }}'
+       port: '{{ frontend_https_port }}'
+       pool: '{{ name }}_nginx'
+       snat: Automap
+       profiles:
+         - http
+         - name: clientssl
+           context: client-side
+
+
+   - name: create prometheus pool
+     bigip_pool:
+       name: '{{ name }}_prometheus'
+       lb_method: round-robin
+       monitor_type: single
+       monitors:
+         - tcp
+
+   - name: add prometheus pool members
+     bigip_pool_member:
+       pool: '{{ name }}_prometheus'
+       host: '{{ backend }}'
+       name: '{{ name }}_backend'
+       port: '{{ item.port }}'
+     loop:
+       - name: nginx1
+         port: "9090"
+   
+   - name: create prometheus http vs
+     bigip_virtual_server:
+       name: '{{ name }}_prometheus'
+       destination: '{{ frontend }}'
+       port: '{{ frontend_prometheus_port }}'
+       pool: '{{ name }}_prometheus'
+       snat: Automap
+       profiles:
+         - http 
+
+   - name: create grafana pool
+     bigip_pool:
+       name: '{{ name }}_grafana'
+       lb_method: round-robin
+       monitor_type: single
+       monitors:
+         - tcp
+
+   - name: add grafana pool members
+     bigip_pool_member:
+       pool: '{{ name }}_grafana'
+       host: '{{ backend }}'
+       name: '{{ name }}_backend'
+       port: '{{ item.port }}'
+     loop:
+       - name: nginx1
+         port: "3000"
+
+   - name: create grafana http vs
+     bigip_virtual_server:
+       name: '{{ name }}_grafana'
+       destination: '{{ frontend }}'
+       port: '{{ frontend_grafana_port }}'
+       pool: '{{ name }}_grafana'
+       snat: Automap
+       profiles:
+         - http

@@ -1,0 +1,183 @@
+version: "3.8"
+services:
+    nginx1:
+        restart: unless-stopped
+        image: nginx:latest
+        ports:
+            - "8081:80"
+            - "4431:443"
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - ./nginx/html:/usr/share/nginx/html
+            - ./nginx/images/1:/usr/share/nginx/html/images
+        networks:
+            nginx_lab:
+                aliases:
+                    - nginx1
+    nginx2:
+        restart: unless-stopped
+        image: nginx:latest
+        ports:
+            - "8082:80"
+            - "4432:443"
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - ./nginx/html:/usr/share/nginx/html
+            - ./nginx/images/2:/usr/share/nginx/html/images
+        networks:
+            nginx_lab:
+                aliases:
+                    - nginx2
+    nginx3:
+        restart: unless-stopped
+        image: nginx:latest
+        ports:
+            - "8083:80"
+            - "4433:443"
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d
+            - ./nginx/html:/usr/share/nginx/html
+            - ./nginx/images/3:/usr/share/nginx/html/images
+        networks:
+            nginx_lab:
+               aliases:
+                  - nginx3
+    nginx4:
+        restart: unless-stopped
+        image: nginx:latest
+        ports:
+            - "8084:80"
+            - "4434:443"
+        volumes:
+            - ./nginx/conf.d:/etc/nginx/conf.d/
+            - ./nginx/html:/usr/share/nginx/html
+            - ./nginx/images/4:/usr/share/nginx/html/images
+        networks:
+            nginx_lab:
+                aliases:
+                    - nginx4
+    nginx-exporter1:
+        depends_on: 
+            - nginx1
+        restart: unless-stopped
+        image: nginx/nginx-prometheus-exporter:latest
+        networks:
+            nginx_lab:
+                aliases:
+                    - exporter1
+        command:
+            - -nginx.scrape-uri
+            - http://nginx1:80/nginx_status
+    nginx-exporter2:
+        depends_on: 
+            - nginx2
+        restart: unless-stopped
+        image: nginx/nginx-prometheus-exporter:latest
+        networks:
+            nginx_lab:
+                aliases:
+                    - exporter2
+        command:
+            - -nginx.scrape-uri
+            - http://nginx2:80/nginx_status
+    nginx-exporter3:
+        depends_on: 
+            - nginx3
+        restart: unless-stopped
+        image: nginx/nginx-prometheus-exporter:latest
+        networks:
+            nginx_lab:
+                aliases:
+                    - exporter3
+        command:
+            - -nginx.scrape-uri
+            - http://nginx3:80/nginx_status
+    nginx-exporter4:
+        build: .
+        depends_on: 
+            - nginx4
+        restart: unless-stopped
+        image: nginx/nginx-prometheus-exporter:latest
+        networks:
+            nginx_lab:
+                aliases:
+                    - exporter4
+        command:
+            - -nginx.scrape-uri
+            - http://nginx4:80/nginx_status
+ 
+    node-exporter:
+        image: prom/node-exporter:latest
+        restart: unless-stopped
+        expose:
+            - 9100
+        networks:
+            nginx_lab:
+                aliases:
+                    - node-exporter
+    cadvisor:
+        image: google/cadvisor:latest
+        restart: unless-stopped
+        volumes:
+            - /:/rootfs:ro
+            - /var/run:/var/run:rw
+            - /sys:/sys:ro
+            - /var/lib/docker:/var/lib.docker:ro
+        expose:
+            - 8080
+        ports:
+            - "9800:8080"
+        networks:
+            nginx_lab:
+                aliases:
+                    - cadvisor
+
+    prometheus:
+        depends_on:
+            - nginx-exporter1
+            - nginx-exporter2
+            - nginx-exporter3
+            - nginx-exporter4
+            - node-exporter
+            - cadvisor
+        restart: unless-stopped
+        user: root
+        image: prom/prometheus:latest
+        volumes:
+            - ./prometheus/prometheus:/etc/prometheus
+            - ./prometheus/data:/prometheus
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+            - '--storage.tsdb.path=/prometheus'
+            - '--storage.tsdb.retention.time=365d'
+            - '--web.console.libraries=/etc/prometheus/console_libraries'
+            - '--web.console.templates=/etc/prometheus/consoles'
+            - '--web.enable-lifecycle'
+            - '--web.enable-admin-api'
+        expose:
+            - 9090
+        ports:
+            - "9090:9090"
+        networks:
+            nginx_lab:
+                aliases:
+                    - prometheus
+
+    grafana:
+        user: root
+        image: grafana/grafana:latest
+        depends_on:
+            - prometheus
+        restart: unless-stopped
+        ports:
+            - 3000:3000
+        volumes:
+            - ./grafana/data:/var/lib/grafana
+              # - ./grafana/provisioning:/etc/grafana/provisioning
+        networks:
+            nginx_lab:
+                aliases:
+                    - grafana
+
+networks:
+    nginx_lab:
