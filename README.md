@@ -15,21 +15,25 @@ Na NGINX OSS web serverech je publikována jednoduchá aplikace, která má na v
 
 ## Prerekvizity
   * Docker
+  * Docker-compose
 
 ## Použití
 
-Klon repozitáře:<br>
-<code>
+Klon repozitáře:
+```
 git clone https://github.com/jiridoubek/lab-env
-</code>
-<br><br>
-Nebo stažení a rozbalení:<br>
-<code>
-curl https://github.com/jiridoubek/lab-env/archive/master.zip<br>
+```
+
+Nebo stažení a rozbalení:
+```
+curl https://github.com/jiridoubek/lab-env/archive/master.zip
 uzip master.zip
-</code>
+```
 
-
+Start projektu:
+```
+docker-compose up
+```
 
 
 
