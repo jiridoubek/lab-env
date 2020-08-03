@@ -35,5 +35,10 @@ Start projektu:
 docker-compose up
 ```
 
+---
 
+## TODO
+  * grafana dashboards
+  * github
+  * jenkins
 
