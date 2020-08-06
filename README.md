@@ -37,7 +37,7 @@ docker-compose up
 
 ## ARM
 
-202008 - nginx prometheus exporter je v docker hubu zkompilovaný jen pro amd64. Pokud je potřeba spustit na jiné architektuře tak:
+202008 - nginx prometheus exporter je v docker hubu zkompilovaný jen pro amd64. Pokud je potřeba spustit na jiné architektuře:
 ```
 git clone https://github.com/nginxinc/nginx-prometheus-exporter.git
 cd nginx-prometheus-exporter/
