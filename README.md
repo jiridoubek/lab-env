@@ -35,10 +35,20 @@ Start projektu:
 docker-compose up
 ```
 
+## ARM
+
+202008 - nginx prometheus exporter je v docker hubu zkompilovaný jen pro amd64. Pokud je potřeba spustit na jiné architektuře tak:
+```
+git clone https://github.com/nginxinc/nginx-prometheus-exporter.git
+cd nginx-prometheus-exporter/
+make container
+```
+
 ---
 
 ## TODO
   * grafana dashboards
   * github
   * jenkins
+  * nginx https
 
