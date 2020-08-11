@@ -34,7 +34,43 @@ Start projektu:
 ```
 docker-compose up
 ```
+## Ubuntu from scratch
+### Docker-CE
+```
+sudo apt-get update
 
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | 
+
+sudo apt-key add -
+
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+sudo apt-get update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo usermod -aG docker your-user
+```
+logout \
+login
+### Docker-compose
+```
+sudo curl -L "https://github.com/docker/compose/releases/download/1.26.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+sudo chmod +x /usr/local/bin/docker-compose
+
+docker-compose --version
+```
 ## ARM
 
 202008 - nginx prometheus exporter je v docker hubu zkompilovaný jen pro amd64. Pokud je potřeba spustit na jiné architektuře:
