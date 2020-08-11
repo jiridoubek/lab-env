@@ -2,14 +2,7 @@
   hosts: localhost
   connection: local
   
-  vars:
-    name: "lab"
-    backend: "172.16.245.100"
-    frontend: "10.10.245.100"
-    frontend_http_port: "80"
-    frontend_https_port: "443"
-    frontend_prometheus_port: "9090"
-    frontend_grafana_port: "3000"
+  include_vars: vars.yaml
   
   environment:
     F5_SERVER: "172.16.245.254"
