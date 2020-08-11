@@ -1,0 +1,70 @@
+- name: Create LAB
+  hosts: localhost
+  connection: local
+  
+  vars_files: 
+    - vars.yaml
+  
+  environment:
+    F5_SERVER: "172.16.245.254"
+    F5_USER: admin
+    F5_PASSWORD: heslohesel123
+    F5_VALIDATE_CERTS: "no"
+          
+  tasks:   
+       
+  - name: delete nginx http vs
+    bigip_virtual_server:
+      state: absent
+      name: '{{ name }}_nginx'
+       
+  - name: delete nginx pool
+    bigip_pool:
+      state: absent
+      name: '{{ name }}_nginx'
+  
+  - name: delete nginx https vs
+    bigip_virtual_server:
+      state: absent
+      name: '{{ name }}_nginx_https'
+  
+  - name: delete nginx ssl pool
+    bigip_pool:
+      state: absent
+      name: '{{ name }}_nginx_ssl'
+       
+  - name: delete prometheus http vs
+    bigip_virtual_server:
+      state: absent
+      name: '{{ name }}_prometheus'
+
+  - name: delete prometheus pool
+    bigip_pool:
+      state: absent
+      name: '{{ name }}_prometheus'
+      
+  - name: delete grafana http vs
+    bigip_virtual_server:
+      state: absent
+      name: '{{ name }}_grafana'
+
+  - name: delete grafana pool
+    bigip_pool:
+      state: absent
+      name: '{{ name }}_grafana'
+
+  - name: delete https monitor
+    bigip_monitor_https:
+      state: absent
+      name: '{{ name }}_https'
+           
+  - name: delete http monitor
+      bigip_monitor_http:
+        state: absent
+        name: '{{ name }}_http'
+
+  - name: delete server node
+    bigip_node:
+      state: absent 
+      host: '{{ backend }}'
+      name: '{{ name }}_backend'
