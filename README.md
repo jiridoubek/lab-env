@@ -71,6 +71,13 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 docker-compose --version
 ```
+
+### Ansible
+```
+sudo apt install python3-pip
+
+sudo pip3 install ansible
+```
 ## ARM
 
 202008 - nginx prometheus exporter je v docker hubu zkompilovaný jen pro amd64. Pokud je potřeba spustit na jiné architektuře:

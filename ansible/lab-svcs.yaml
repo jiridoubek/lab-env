@@ -2,7 +2,8 @@
   hosts: localhost
   connection: local
   
-  include_vars: vars.yaml
+  vars_files: 
+    - vars.yaml
   
   environment:
     F5_SERVER: "172.16.245.254"
